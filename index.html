@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Herbarium — 50 Medicinal Plants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Serif+4:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1EAD9;
+    --paper-dark:#E7DEC7;
+    --ink:#2B241C;
+    --ink-soft:#5C4630;
+    --green:#3F5D3B;
+    --green-dark:#2A3F27;
+    --moss:#7C8F6E;
+    --stamp:#A34B36;
+    --line:#C9BC9F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(124,143,110,0.06) 0, transparent 45%),
+      radial-gradient(circle at 85% 75%, rgba(163,75,54,0.05) 0, transparent 40%);
+    color:var(--ink);
+    font-family:'Source Serif 4', serif;
+    line-height:1.6;
+  }
+  header{
+    padding:56px 24px 32px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:var(--paper);
+  }
+  header .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--moss);
+    margin-bottom:10px;
+  }
+  header h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    font-size:44px;
+    margin:0 0 8px;
+    color:var(--green-dark);
+  }
+  header p{
+    font-size:15px;
+    color:var(--ink-soft);
+    max-width:520px;
+    margin:0 auto;
+  }
+  .controls{
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding:16px 24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+  }
+  #search{
+    font-family:'Source Serif 4', serif;
+    font-size:15px;
+    padding:9px 14px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    background:#fff;
+    min-width:220px;
+    color:var(--ink);
+  }
+  #search:focus{outline:none; border-color:var(--green);}
+  .chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.03em;
+    padding:7px 13px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+  }
+  .chip.active{
+    background:var(--green);
+    border-color:var(--green);
+    color:#fff;
+  }
+  .count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--moss);
+    text-align:center;
+    padding:14px 24px 0;
+  }
+  .grid{
+    max-width:1180px;
+    margin:0 auto;
+    padding:20px 24px 80px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:22px;
+  }
+  .sheet{
+    background:#FCF9F0;
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:20px 18px 18px;
+    position:relative;
+    box-shadow:0 1px 0 rgba(0,0,0,0.03);
+  }
+  .sheet::before, .sheet::after{
+    content:'';
+    position:absolute;
+    width:26px;
+    height:14px;
+    background:rgba(163,75,54,0.14);
+    border:1px solid rgba(163,75,54,0.25);
+    top:-7px;
+  }
+  .sheet::before{left:14px; transform:rotate(-4deg);}
+  .sheet::after{right:14px; transform:rotate(3deg);}
+  .sheet img{
+    width:100%;
+    height:140px;
+    object-fit:cover;
+    display:block;
+    margin-bottom:10px;
+    border:1px solid var(--line);
+    background:var(--paper-dark);
+  }
+  .specimen-no{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    color:var(--moss);
+    letter-spacing:0.05em;
+  }
+  .sheet h2{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:21px;
+    color:var(--green-dark);
+    margin:6px 0 1px;
+  }
+  .common{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  .tag-row{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .fam-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    padding:3px 8px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--ink-soft);
+  }
+  .use-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    padding:3px 8px;
+    background:rgba(63,93,59,0.1);
+    border-radius:10px;
+    color:var(--green-dark);
+  }
+  .part{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  .part b{color:var(--ink); font-weight:600;}
+  .use-desc{
+    font-size:13.5px;
+    color:var(--ink);
+    margin:0;
+    border-top:1px dashed var(--line);
+    padding-top:8px;
+  }
+  .no-results{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:20px;
+    display:none;
+  }
+  footer{
+    text-align:center;
+    padding:30px 20px 50px;
+    font-size:12px;
+    color:var(--moss);
+    font-family:'IBM Plex Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Digital herbarium · reference collection</div>
+  <h1>50 medicinal plants &amp; herbs</h1>
+  <p>A pressed-specimen index of botanicals used across Ayurvedic, Siddha, and global pharmacopeial traditions — with family, part used, and primary therapeutic action.</p>
+</header>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="Search by name, family, or use...">
+  <span class="chip active" data-filter="all">All</span>
+  <span class="chip" data-filter="Immunomodulator">Immunity</span>
+  <span class="chip" data-filter="Anti-inflammatory">Anti-inflammatory</span>
+  <span class="chip" data-filter="Digestive">Digestive</span>
+  <span class="chip" data-filter="Respiratory">Respiratory</span>
+  <span class="chip" data-filter="Antimicrobial">Antimicrobial</span>
+  <span class="chip" data-filter="Cardiovascular">Cardiovascular</span>
+  <span class="chip" data-filter="Anticancer">Anticancer</span>
+  <span class="chip" data-filter="Nervine/Cognitive">Nervine/Cognitive</span>
+  <span class="chip" data-filter="Reproductive">Reproductive</span>
+  <span class="chip" data-filter="Antidiabetic">Antidiabetic</span>
+  <span class="chip" data-filter="Skin/Wound">Skin/Wound</span>
+  <span class="chip" data-filter="Other">Other</span>
+</div>
+
+<div class="count" id="count"></div>
+<div class="grid" id="grid"></div>
+<div class="no-results" id="noResults">No specimens match your search.</div>
+
+<footer>Herbarium reference sheet — arranged for classroom &amp; laboratory use</footer>
+
+<script>
+const plants = [
+{n:"Ocimum sanctum",c:"Tulsi (Holy basil)",f:"Lamiaceae",p:"Leaves",cat:"Immunomodulator",u:"Immunomodulator; used for respiratory ailments, colds, and stress."},
+{n:"Azadirachta indica",c:"Neem",f:"Meliaceae",p:"Leaves, bark, seed oil",cat:"Antimicrobial",u:"Antimicrobial and antifungal; widely used for skin disorders."},
+{n:"Withania somnifera",c:"Ashwagandha",f:"Solanaceae",p:"Root",cat:"Nervine/Cognitive",u:"Adaptogen; reduces stress and supports vitality."},
+{n:"Aloe vera",c:"Aloe",f:"Asphodelaceae",p:"Leaf gel",cat:"Skin/Wound",u:"Promotes wound healing and soothes skin conditions."},
+{n:"Curcuma longa",c:"Turmeric",f:"Zingiberaceae",p:"Rhizome",cat:"Anti-inflammatory",u:"Anti-inflammatory and antioxidant; used in wound and joint care."},
+{n:"Zingiber officinale",c:"Ginger",f:"Zingiberaceae",p:"Rhizome",cat:"Digestive",u:"Digestive aid; relieves nausea and motion sickness."},
+{n:"Piper nigrum",c:"Black pepper",f:"Piperaceae",p:"Fruit",cat:"Digestive",u:"Enhances bioavailability of other compounds; digestive stimulant."},
+{n:"Piper longum",c:"Long pepper",f:"Piperaceae",p:"Fruit",cat:"Respiratory",u:"Used for respiratory conditions and as a digestive stimulant."},
+{n:"Rauvolfia serpentina",c:"Sarpagandha",f:"Apocynaceae",p:"Root",cat:"Cardiovascular",u:"Antihypertensive; source of reserpine."},
+{n:"Catharanthus roseus",c:"Sadabahar",f:"Apocynaceae",p:"Whole plant",cat:"Anticancer",u:"Source of vincristine and vinblastine, key anticancer alkaloids."},
+{n:"Centella asiatica",c:"Gotu kola",f:"Apiaceae",p:"Leaves",cat:"Nervine/Cognitive",u:"Cognitive enhancer; supports wound healing and circulation."},
+{n:"Bacopa monnieri",c:"Brahmi",f:"Plantaginaceae",p:"Whole plant",cat:"Nervine/Cognitive",u:"Memory enhancer and nervine tonic."},
+{n:"Tinospora cordifolia",c:"Guduchi",f:"Menispermaceae",p:"Stem",cat:"Immunomodulator",u:"Immunomodulator used broadly in fevers and general debility."},
+{n:"Terminalia chebula",c:"Haritaki",f:"Combretaceae",p:"Fruit",cat:"Digestive",u:"Digestive and mild laxative; a key ingredient of Triphala."},
+{n:"Terminalia bellirica",c:"Bibhitaki",f:"Combretaceae",p:"Fruit",cat:"Respiratory",u:"Respiratory tonic; used for cough and throat conditions."},
+{n:"Phyllanthus emblica",c:"Amla (Indian gooseberry)",f:"Phyllanthaceae",p:"Fruit",cat:"Other",u:"Rich vitamin C source with strong antioxidant activity."},
+{n:"Glycyrrhiza glabra",c:"Licorice",f:"Fabaceae",p:"Root",cat:"Respiratory",u:"Expectorant; also used for ulcers and sore throat."},
+{n:"Asparagus racemosus",c:"Shatavari",f:"Asparagaceae",p:"Root",cat:"Reproductive",u:"Female reproductive tonic; supports lactation."},
+{n:"Trigonella foenum-graecum",c:"Fenugreek",f:"Fabaceae",p:"Seeds",cat:"Antidiabetic",u:"Helps regulate blood glucose levels."},
+{n:"Allium sativum",c:"Garlic",f:"Amaryllidaceae",p:"Bulb",cat:"Cardiovascular",u:"Cardioprotective and antimicrobial."},
+{n:"Allium cepa",c:"Onion",f:"Amaryllidaceae",p:"Bulb",cat:"Anti-inflammatory",u:"Anti-inflammatory; supports cardiovascular health."},
+{n:"Papaver somniferum",c:"Opium poppy",f:"Papaveraceae",p:"Latex/seed capsule",cat:"Other",u:"Source of morphine; potent analgesic (cultivation restricted)."},
+{n:"Cinchona officinalis",c:"Cinchona",f:"Rubiaceae",p:"Bark",cat:"Other",u:"Source of quinine, the classic antimalarial compound."},
+{n:"Digitalis purpurea",c:"Foxglove",f:"Plantaginaceae",p:"Leaves",cat:"Cardiovascular",u:"Source of digoxin, used as a cardiotonic in heart failure."},
+{n:"Atropa belladonna",c:"Belladonna",f:"Solanaceae",p:"Leaves, root",cat:"Other",u:"Anticholinergic; used as an antispasmodic."},
+{n:"Datura metel",c:"Datura",f:"Solanaceae",p:"Leaves, seeds",cat:"Respiratory",u:"Bronchodilator and analgesic (toxic; used with caution)."},
+{n:"Ephedra sinica",c:"Ephedra",f:"Ephedraceae",p:"Stem",cat:"Respiratory",u:"Bronchodilator and nasal decongestant."},
+{n:"Podophyllum hexandrum",c:"Himalayan mayapple",f:"Berberidaceae",p:"Rhizome",cat:"Anticancer",u:"Source of podophyllotoxin, used in anticancer drug synthesis."},
+{n:"Taxus wallichiana",c:"Himalayan yew",f:"Taxaceae",p:"Bark, needles",cat:"Anticancer",u:"Source of paclitaxel (taxol), a major anticancer compound."},
+{n:"Rheum emodi",c:"Indian rhubarb",f:"Polygonaceae",p:"Rhizome",cat:"Digestive",u:"Used as a laxative and digestive stimulant."},
+{n:"Berberis aristata",c:"Daruharidra",f:"Berberidaceae",p:"Root, stem",cat:"Antimicrobial",u:"Antimicrobial and hepatoprotective."},
+{n:"Cassia angustifolia",c:"Senna",f:"Fabaceae",p:"Leaves, pods",cat:"Digestive",u:"Widely used laxative; cultivated commercially in Tamil Nadu."},
+{n:"Mentha piperita",c:"Peppermint",f:"Lamiaceae",p:"Leaves",cat:"Digestive",u:"Carminative; relieves indigestion and bloating."},
+{n:"Eucalyptus globulus",c:"Eucalyptus",f:"Myrtaceae",p:"Leaves, oil",cat:"Respiratory",u:"Decongestant and antiseptic, used in respiratory relief."},
+{n:"Camellia sinensis",c:"Tea plant",f:"Theaceae",p:"Leaves",cat:"Other",u:"Antioxidant-rich stimulant beverage source."},
+{n:"Vetiveria zizanioides",c:"Vetiver (Khus)",f:"Poaceae",p:"Root",cat:"Skin/Wound",u:"Cooling and antiseptic; used in skin and stress relief formulations."},
+{n:"Andrographis paniculata",c:"Kalmegh",f:"Acanthaceae",p:"Leaves",cat:"Immunomodulator",u:"Hepatoprotective and antipyretic; supports immune response."},
+{n:"Boerhavia diffusa",c:"Punarnava",f:"Nyctaginaceae",p:"Root",cat:"Other",u:"Diuretic; used to support kidney function."},
+{n:"Commiphora wightii",c:"Guggul",f:"Burseraceae",p:"Resin",cat:"Anti-inflammatory",u:"Lowers lipid levels; anti-inflammatory resin."},
+{n:"Plumbago zeylanica",c:"Chitrak",f:"Plumbaginaceae",p:"Root",cat:"Digestive",u:"Digestive stimulant used in Ayurvedic formulations."},
+{n:"Nyctanthes arbor-tristis",c:"Harsingar",f:"Oleaceae",p:"Leaves, flowers",cat:"Other",u:"Antipyretic and anti-inflammatory."},
+{n:"Moringa oleifera",c:"Drumstick tree",f:"Moringaceae",p:"Leaves, pods",cat:"Other",u:"Highly nutritional; rich in antioxidants and micronutrients."},
+{n:"Aegle marmelos",c:"Bael",f:"Rutaceae",p:"Fruit, leaves",cat:"Digestive",u:"Digestive tonic; used for diarrhoea and dysentery."},
+{n:"Adhatoda vasica",c:"Vasaka",f:"Acanthaceae",p:"Leaves",cat:"Respiratory",u:"Expectorant and bronchodilator for cough and asthma."},
+{n:"Hemidesmus indicus",c:"Indian sarsaparilla",f:"Apocynaceae",p:"Root",cat:"Other",u:"Blood purifier and diuretic."},
+{n:"Gymnema sylvestre",c:"Gurmar",f:"Apocynaceae",p:"Leaves",cat:"Antidiabetic",u:"Reduces sugar cravings; supports blood glucose regulation."},
+{n:"Convolvulus pluricaulis",c:"Shankhpushpi",f:"Convolvulaceae",p:"Whole plant",cat:"Nervine/Cognitive",u:"Nervine tonic supporting mental clarity and calm."},
+{n:"Saraca asoca",c:"Ashoka",f:"Fabaceae",p:"Bark",cat:"Reproductive",u:"Uterine tonic used for gynaecological disorders."},
+{n:"Acorus calamus",c:"Vacha",f:"Acoraceae",p:"Rhizome",cat:"Nervine/Cognitive",u:"Nervine and digestive stimulant."},
+{n:"Vitex negundo",c:"Nirgundi",f:"Lamiaceae",p:"Leaves",cat:"Anti-inflammatory",u:"Anti-inflammatory and analgesic; used for joint pain."}
+];
+
+const grid = document.getElementById('grid');
+const countEl = document.getElementById('count');
+const noResults = document.getElementById('noResults');
+let activeFilter = 'all';
+let searchTerm = '';
+
+function slugify(name){
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function render(){
+  const filtered = plants.filter(p => {
+    const matchesFilter = activeFilter === 'all' || p.cat === activeFilter;
+    const hay = (p.n + ' ' + p.c + ' ' + p.f + ' ' + p.u + ' ' + p.cat).toLowerCase();
+    const matchesSearch = hay.includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  grid.innerHTML = filtered.map((p, i) => `
+    <div class="sheet">
+      <img src="images/${slugify(p.n)}.jpg" alt="${p.c}" onerror="this.style.display='none'">
+      <div class="specimen-no">Specimen no. ${String(plants.indexOf(p)+1).padStart(3,'0')}</div>
+      <h2>${p.n}</h2>
+      <p class="common">${p.c}</p>
+      <div class="tag-row">
+        <span class="fam-tag">${p.f}</span>
+        <span class="use-tag">${p.cat}</span>
+      </div>
+      <p class="part"><b>Part used:</b> ${p.p}</p>
+      <p class="use-desc">${p.u}</p>
+    </div>
+  `).join('');
+
+  countEl.textContent = `Showing ${filtered.length} of ${plants.length} specimens`;
+  noResults.style.display = filtered.length === 0 ? 'block' : 'none';
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.filter;
+    render();
+  });
+});
+
+render();
+</script>
+
+</body>
+</html>
